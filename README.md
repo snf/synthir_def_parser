@@ -1,7 +1,7 @@
 # synthir_def_parser
 
 Definition parser for CPU arch description used in Synthir experiment
-that gets the file (check the one in test/) and writes a trait
+that gets the file (check the one in defs/) and writes a trait
 implementation in Rust.
 
 ## Full Disclosure
