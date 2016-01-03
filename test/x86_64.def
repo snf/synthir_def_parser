@@ -1,0 +1,115 @@
+macro GPR_def(rq, rd, rw, rb)
+  rq = Reg(64, GPR)
+  rd = SubReg(rq, 32, 0)
+  rw = SubReg(rq, 16, 0)
+  rb = SubReg(rq, 8,  0)
+end
+
+GPR_def(RAX, EAX, AX, AL)
+GPR_def(RBX, EBX, BX, BL)
+GPR_def(RCX, ECX, CX, CL)
+GPR_def(RDX, EDX, DX, DL)
+GPR_def(RSI, ESI, SI, SIL)
+GPR_def(RDI, EDI, DI, DIL)
+GPR_def(RBP, EBP, BP, BPL)
+GPR_def(RSP, ESP, SP, SPL)
+GPR_def(R8, R8D, R8W, R8B)
+GPR_def(R9, R9D, R9W, R9B)
+GPR_def(R10, R10D, R10W, R10B)
+GPR_def(R11, R11D, R11W, R11B)
+GPR_def(R12, R12D, R12W, R12B)
+GPR_def(R13, R13D, R13W, R13B)
+GPR_def(R14, R14D, R14W, R14B)
+GPR_def(R15, R15D, R15W, R15B)
+
+
+macro VEC256_def(rbig, rlow)
+  rbig = Reg(256, VECTOR256, GPR | VECTOR | FP80)
+  rlow = SubReg(rbig, 128, 0)
+end
+
+VEC256_def(YMM0, XMM0)
+VEC256_def(YMM1, XMM1)
+VEC256_def(YMM2, XMM2)
+VEC256_def(YMM3, XMM3)
+VEC256_def(YMM4, XMM4)
+VEC256_def(YMM5, XMM5)
+VEC256_def(YMM6, XMM6)
+VEC256_def(YMM7, XMM7)
+VEC256_def(YMM8, XMM8)
+VEC256_def(YMM9, XMM9)
+VEC256_def(YMM10, XMM10)
+VEC256_def(YMM11, XMM11)
+VEC256_def(YMM12, XMM12)
+VEC256_def(YMM13, XMM13)
+VEC256_def(YMM14, XMM14)
+VEC256_def(YMM15, XMM15)
+
+// RFLAGS
+// Ignore Trap, Interrupt, IOPL
+RFLAGS = Reg(64, FLAGS, FLAGS)
+CF = Bit(RFLAGS, 0)
+PF = Bit(RFLAGS, 2)
+AF = Bit(RFLAGS, 4)
+ZF = Bit(RFLAGS, 6)
+SF = Bit(RFLAGS, 7)
+//TF = Bit(RFLAGS, 8)
+//IF = Bit(RFLAGS, 9)
+DF = Bit(RFLAGS, 10)
+OF = Bit(RFLAGS, 11)
+//IOPL = Bits(RFLAGS, 12, 13)
+//NT = Bit(RFLAGS, 14)
+// Resume flag
+//RF = Bit(RFLAGS, 16)
+// Virtual 8086
+//VM = Bit(RFLAGS, 17)
+// Alignement check
+//AC = Bit(RFLAGS, 18)
+//VIF= Bit(RFLAGS, 19)
+//VIP= Bit(RFLAGS, 20)
+// Has CPUID
+//ID = Bit(RFLAGS, 21)
+
+// MXCSR
+MXCSR = Reg(64, FLAGS, FLAGS)
+FZ = Bit(MXCSR, 15)
+R_POS = Bit(MXCSR, 14)
+R_NEG = Bit(MXCSR, 13)
+PM = Bit(MXCSR, 12)
+UM = Bit(MXCSR, 11)
+OM = Bit(MXCSR, 10)
+ZM = Bit(MXCSR, 9)
+DM = Bit(MXCSR, 8)
+IM = Bit(MXCSR, 7)
+DAZ= Bit(MXCSR, 6)
+PE = Bit(MXCSR, 5)
+UE = Bit(MXCSR, 4)
+OE = Bit(MXCSR, 3)
+ZE = Bit(MXCSR, 2)
+DE = Bit(MXCSR, 1)
+IE = Bit(MXCSR, 0)
+
+RIP = Reg(64, IP, IP)
+
+BaseReg = RAX
+
+// Remember that Stack pointer might be wrong so don't trust the stack
+
+// Load/Store is %1 = RegName, %2 = ByteOffset
+LOAD(BASE_REG, "int3; movq rax, %0", 0)
+LOAD(GPR, "mov %1, [rax+%2]")
+LOAD(VECTOR256, "vmovdqu %1, [rax+%2]")
+// This will make the stack dirty as it's not clean, but we are setting the
+// new stack later
+LOAD(RFLAGS, "lea rsp, [rax+%2]; popfq", 1)
+LOAD(MXCSR, "ldmxcsr [rax+%2]")
+LOAD(RAX, "mov rax, [rax+%2]", 9)
+LOAD(IP, "PTRACE")
+
+STORE(GPR, "mov [rax+%2], %1")
+STORE(VECTOR256, "vmovupd [rax+%2], %1")
+STORE(MXCSR, "stmxcsr [rax+%2]")
+STORE(RFLAGS, "lea rsp, [rax+%2+8]; pushfq", 8)
+STORE(RAX, "movabs [ %0], rax", 0)
+STORE(BASE_REG, "movq rax, %0", 1)
+STORE(IP, "PTRACE")
