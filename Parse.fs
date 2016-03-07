@@ -3,7 +3,7 @@
 open FParsec
 
 // Ast definition
-type RegTypes = GPR | VECTOR | FLAGS
+type RegTypes = GPR | VECTOR | FLAGS | SP
 type RegType = RegTypes list
 
 type arg =

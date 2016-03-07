@@ -7,6 +7,7 @@ type GAst =
 
 type RegType =
     | GPR       // Can be anything
+    | SP        // Manipulates the stack
     | Vector    // Can have many values packed in the register
     | Flag      // The register doesn't mean anything, only the subregs should be checked
     | Segment   // Change the address type
@@ -60,6 +61,7 @@ let string_to_flag s =
     | "FP32"   -> Fp32
     | "FP64"   -> Fp64
     | "GPR"    -> GPR
+    | "SP"     -> SP
     | "FLAGS"  -> Flag
     | "IP"     -> IP
     | _        -> failwith (sprintf "flag not recognized: %s" s)
@@ -159,7 +161,7 @@ let find_x ast reg x =
     |> (fun (s, p) -> s.Replace("%1", reg.name).Replace("%2", string reg.store_offset), p)
     // Here I should add a counter for knowing how many steps it has to make till it hits the
     // real instruction.
-    //|> List.map (fun (s, p) -> 
+    //|> List.map (fun (s, p) ->
 
 let find_load ast reg = find_x ast reg "LOAD"
 let find_store ast reg = find_x ast reg "STORE"
@@ -184,4 +186,3 @@ let gen_structs (ast: Parse.Ast) =
 
 let test_me ast =
     gen_structs ast
-

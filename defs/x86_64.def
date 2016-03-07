@@ -5,14 +5,19 @@ macro GPR_def(rq, rd, rw, rb)
   rb = SubReg(rq, 8,  0)
 end
 
+macro SP_def(rq, rd, rw, rb)
+  rq = Reg(64, SP, GPR | SP)
+  rd = SubReg(rq, 32, 0)
+  rw = SubReg(rq, 16, 0)
+  rb = SubReg(rq, 8,  0)
+end
+
 GPR_def(RAX, EAX, AX, AL)
 GPR_def(RBX, EBX, BX, BL)
 GPR_def(RCX, ECX, CX, CL)
 GPR_def(RDX, EDX, DX, DL)
 GPR_def(RSI, ESI, SI, SIL)
 GPR_def(RDI, EDI, DI, DIL)
-GPR_def(RBP, EBP, BP, BPL)
-GPR_def(RSP, ESP, SP, SPL)
 GPR_def(R8, R8D, R8W, R8B)
 GPR_def(R9, R9D, R9W, R9B)
 GPR_def(R10, R10D, R10W, R10B)
@@ -21,6 +26,8 @@ GPR_def(R12, R12D, R12W, R12B)
 GPR_def(R13, R13D, R13W, R13B)
 GPR_def(R14, R14D, R14W, R14B)
 GPR_def(R15, R15D, R15W, R15B)
+SP_def(RBP, EBP, BP, BPL)
+SP_def(RSP, ESP, SP, SPL)
 
 
 macro VEC256_def(rbig, rlow)
@@ -98,6 +105,7 @@ BaseReg = RAX
 // Load/Store is %1 = RegName, %2 = ByteOffset
 LOAD(BASE_REG, "int3; movq rax, %0", 0)
 LOAD(GPR, "mov %1, [rax+%2]")
+LOAD(SP, "mov %1, [rax+%2]")
 LOAD(VECTOR256, "vmovdqu %1, [rax+%2]")
 // This will make the stack dirty as it's not clean, but we are setting the
 // new stack later
@@ -107,6 +115,7 @@ LOAD(RAX, "mov rax, [rax+%2]", 9)
 LOAD(IP, "PTRACE")
 
 STORE(GPR, "mov [rax+%2], %1")
+STORE(SP, "mov [rax+%2], %1")
 STORE(VECTOR256, "vmovupd [rax+%2], %1")
 STORE(MXCSR, "stmxcsr [rax+%2]")
 STORE(RFLAGS, "lea rsp, [rax+%2+8]; pushfq", 8)

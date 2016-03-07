@@ -33,6 +33,7 @@ let reg_definition = """
     regs.insert("REG_NAME", RegDefinition {
         offset: REG_OFF, width: REG_WIDTH, fp: REG_FP, ip: REG_IP,
         vector: REG_VECTOR, segment: REG_SEGMENT, flags: REG_FLAG,
+        sp: REG_SP,
         sub_regs: vec![SUB_REGS]
     });
     """
@@ -55,13 +56,14 @@ let rust_def state asm =
             let bool2str x = if x = true then "true" else "false"
             let is_fp = r.ty |> List.exists (fun x -> match x with | Fp32 | Fp64 | Fp80 -> true | _ -> false) |> bool2str
             let is_vec= r.ty |> List.exists (fun x -> x = Vector) |> bool2str
+            let is_sp = r.ty |> List.exists (fun x -> x = SP) |> bool2str
             let is_ip = r.ty |> List.exists (fun x -> x = IP) |> bool2str
             let is_seg= r.ty |> List.exists (fun x -> x = Segment) |> bool2str
             let is_flag=r.ty |> List.exists (fun x -> x = Flag) |> bool2str
             let sub_regs_names = r.sub_regs |> List.map (fun r -> "\"" + r.name + "\"") |> String.concat ","
             let t_reg = reg_definition.Replace("REG_NAME", name).Replace("REG_OFF", string off).Replace("REG_WIDTH", string width)
             let t_reg = t_reg.Replace("REG_FLAG", is_flag).Replace("REG_IP", is_ip).Replace("REG_VECTOR", is_vec)
-            let t_reg = t_reg.Replace("REG_SEGMENT", is_seg).Replace("REG_FP", is_fp)
+            let t_reg = t_reg.Replace("REG_SEGMENT", is_seg).Replace("REG_FP", is_fp).Replace("REG_SP", is_sp)
             let t_reg = t_reg.Replace("SUB_REGS", sub_regs_names)
             let sub_regs =
                 r.sub_regs
